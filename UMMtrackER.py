@@ -1,6 +1,6 @@
 from tkinter import * 
 from PIL import Image,ImageTk #FOR SETTING IMAGES.
-from tkinter import ttk
+from tkinter import ttk #FOR MAKING WIDGES(COMBO-BOXES HERE)
 class ummtracker:
     def __init__(self,root):#WINDOW NAME
         self.root=root
