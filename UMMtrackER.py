@@ -1,3 +1,4 @@
+ #******************************************START****************************************************
 from tkinter import * 
 from PIL import Image,ImageTk #FOR SETTING IMAGES.
 from tkinter import ttk  #FOR MAKING WIDGES(COMBO-BOXES HERE)
@@ -494,4 +495,4 @@ if __name__ =="__main__":
     root=Tk()
     obj=ummtracker(root)
     root.mainloop() #CLOSING OF ROOT
-         
+         #****************************************FINISH***************************************************
