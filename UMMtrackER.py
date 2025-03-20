@@ -61,16 +61,16 @@ class ummtracker:
         button=Button(buttonframe,command=self.AddMedlower,text=" ADD MEDICINE ",
                       font=("arial",12,"bold"),bg="darkgreen",fg="white")
         button.grid(row=0,column=0,padx=0,pady=5)
-        button=Button(buttonframe,text="  UPDATE  ",
+        button=Button(buttonframe,command=self.updatelower,text="  UPDATE  ",
                       font=("arial",12,"bold"),bg="orange",fg="white")
         button.grid(row=0,column=1,padx=2,pady=5)
-        button=Button(buttonframe,text="  DELETE  ",
+        button=Button(buttonframe,command=self.deletelower,text="  DELETE  ",
                       font=("arial",12,"bold"),bg="darkred",fg="white")
         button.grid(row=0,column=2,padx=3,pady=5)
-        button=Button(buttonframe,text="  RESET  ",
+        button=Button(buttonframe,command=self.resetlower,text="  RESET  ",
                       font=("arial",12,"bold"),bg="purple",fg="white")
         button.grid(row=0,column=3,padx=4,pady=5)
-        button=Button(buttonframe,text="  EXIT  ",
+        button=Button(buttonframe,command=self.exitlower,text="  EXIT  ",
                       font=("arial",12,"bold"),bg="darkgrey",fg="white")
         button.grid(row=0,column=4,padx=5,pady=5)
              #SEARCH BY OPTION:-
@@ -78,17 +78,19 @@ class ummtracker:
                         text="  SEARCH BY  ",
                         padx=2,bg="darkblue",fg="white",)
         Iblsearch.grid(row=0,column=5,padx=6,pady=5,sticky=W)
-        serch_combo=ttk.Combobox(buttonframe,width=12,font=("arial",13,"bold"),state="readonly")
+                  #***********************************SEARCHBYLOWER VARIABLE**********************************************
+        self.searchbyvar=StringVar()
+        serch_combo=ttk.Combobox(buttonframe,textvariable=self.searchbyvar,width=12,font=("arial",13,"bold"),state="readonly")
         serch_combo["value"]=("Ref","Lot","Medname")
         serch_combo.grid(row=0,column=6,padx=7,pady=5)
         serch_combo.current(0)
-
-        txtserch=Entry(buttonframe,bd=3,relief=RIDGE,width=12,font=("ariel",12,"bold"))
+        self.searchbytextvar=StringVar()
+        txtserch=Entry(buttonframe,textvariable=self.searchbytextvar,bd=3,relief=RIDGE,width=12,font=("ariel",12,"bold"))
         txtserch.grid(row=0,column=8,padx=8,pady=5)
-        button=Button(buttonframe,text=" SEARCH  ",
+        button=Button(buttonframe,command=self.searchbylower,text=" SEARCH  ",
                       font=("arial",12,"bold"),bg="darkblue",fg="white")
         button.grid(row=0,column=9,padx=9,pady=5)
-        button=Button(buttonframe,text="  SHOW ALL  ",
+        button=Button(buttonframe,command=self.fetchlower,text="  SHOW ALL  ",
                       font=("arial",12,"bold"),bg="black",fg="white")
         button.grid(row=0,column=10,padx=10,pady=5)
         #*****************************************************label and entry:-************************************************************
@@ -162,7 +164,7 @@ class ummtracker:
         ref_combo=Entry(dataframeleft, textvariable=self.qntyvar, width=22, font=("arial", 12, "bold"))
         ref_combo.grid(row=1,column=3,sticky=W)
         #************************************xuv auer jaha auer tag********************************************
-        refno=Label(dataframeleft,font=("arial", 18, "bold"), text="ZUV AUER---JAHA AUER", padx=2,pady=6,background="white",foreground="darkblue")
+        refno=Label(dataframeleft,font=("arial", 18, "bold"), text="ZUV AUER - JAHA AUER", padx=2,pady=6,background="white",foreground="darkred")
         refno.place(x=345,y=65)
         #****************************************LEFT FRAME IMAGES*********************************************
         logo3=Image.open("C:\\Users\\X1 Yoga\\OneDrive\\Desktop\\PYTHON LAB\\left2.webp")
@@ -271,7 +273,12 @@ class ummtracker:
         self.pharmacy_table.column("dosage",width=60)
         self.pharmacy_table.column("price",width=70)
         self.pharmacy_table.column("productqty",width=100)
+        #self.AddMedlower()
         self.fetchdataMed()
+        self.fetchlower()
+        self.pharmacy_table.bind("<ButtonRelease-1>",self.medgetlower)
+        
+        
 
                    #******************************CREATING TABLE IN MYSQL*******************************************
                    #FIRSTLY CREATE DATABASE NAMELY UMMTRACKER AND THEN CREATE TWO TABLES IN THAT--->PHARMA AND 
@@ -324,7 +331,7 @@ class ummtracker:
                  conn.commit()
                  print("updated successfully")
                  messagebox.showinfo("Success","DATA UPDATED SUCCESSFULLY")
-                 self.fetchdatamed()
+                 self.fetchdataMed()
                  conn.close()
                
         #******************************************************DELETING MEDICINE ITEM**************************************
@@ -370,16 +377,119 @@ class ummtracker:
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
           values = (val1, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11, val12, val13)
-
-          cursor.execute(query, values)
+          cursor.execute(query,values)
           conn.commit()
+          self.fetchlower()
+          #self.medgetlower()
           messagebox.showinfo("Success", "Data inserted successfully!")
           conn.close()
-
-
-
-
-
+          #git
+    def fetchlower(self):
+        conn = mysql.connector.connect(host="localhost",user="root",password="7006760858",database="UMMTRACKER")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM PHDATA")
+        rows=cursor.fetchall()
+        if len(rows)!=0:
+            self.pharmacy_table.delete(*self.pharmacy_table.get_children())
+            for i in rows:
+                self.pharmacy_table.insert("",END,values=i)
+        conn.commit()
+        conn.close()
+    def medgetlower(self,event=""):
+        row=self.pharmacy_table.focus()
+        content=self.pharmacy_table.item(row)
+        rows=content["values"]
+        self.refvar.set(rows[0]),
+        self.cpynamevar.set(rows[1]),
+        self.typevar.set(rows[2]),
+        self.mednamevar.set(rows[3]),
+        self.lotvar.set(rows[4]),
+        self.issuevar.set(rows[5]),
+        self.expirevar.set(rows[6]),
+        self.usesvar.set(rows[7]),
+        self.efectsvar.set(rows[8]),
+        self.warningvar.set(rows[9]),
+        self.dosagevar.set(rows[10]),
+        self.pricevar.set(rows[11]),
+        self.qntyvar.set(rows[12])
+    def updatelower(self):
+        if self.refvar.get()=="" or self.lotvar.get()=="":
+                messagebox.showerror("Error","BOTH FIELDS ARE REQUIRED")
+        else:
+                 conn=mysql.connector.connect(host="localhost",user="root",password="7006760858",database="UMMTRACKER")
+                 cursor=conn.cursor()
+                 cursor.execute("""UPDATE PHDATA SET COMPANYNAME=%s,MEDICINETYPE=%s,MEDICINENAME=%s,LOTNO=%s,ISSUEDAT=%s,EXPDAT=%s,USES=%s,EFFECTS=%s,WARNINGS=%s,DOSAGE=%s,MEDPRICE=%s,QNTY=%s WHERE REFNO=%s""",(
+                     self.cpynamevar.get(),
+                     self.typevar.get(),
+                     self.mednamevar.get(),
+                     self.lotvar.get() ,
+                     self.issuevar.get() , 
+                     self.expirevar.get() , 
+                     self.usesvar.get(),
+                     self.efectsvar.get(),
+                     self.warningvar.get(),
+                     self.dosagevar.get(),
+                    self.pricevar.get(),
+                    self.qntyvar.get(),
+                    self.refvar.get()
+                 ))
+                 conn.commit()
+                 self.fetchlower()
+                 messagebox.showinfo("Success","DATA UPDATED SUCCESSFULLY")
+                 conn.close()
+    def searchbylower(self):
+        search_by = self.searchbyvar.get()
+        search_text = self.searchbytextvar.get()
+        if search_text == "":
+            messagebox.showerror("Error", "Please enter a value to search!", parent=self.root)
+            return
+        conn = mysql.connector.connect(host="localhost", user="root", password="7006760858", database="UMMTRACKER")
+        cursor = conn.cursor()
+        if search_by == "Ref":
+            query = "SELECT * FROM PHDATA WHERE REFNO LIKE %s"
+        elif search_by == "Medname":
+            query = "SELECT * FROM PHDATA WHERE MEDICINENAME LIKE %s"
+        elif search_by == "Lot":
+            query = "SELECT * FROM PHDATA WHERE LOTNO LIKE %s"
+        else:
+            messagebox.showerror("Error", "Invalid search category!", parent=self.root)
+            return
+        cursor.execute(query, ('%' + search_text + '%',))
+        rows = cursor.fetchall()
+        if len(rows) == 0:
+            messagebox.showinfo("No Results", "No matching records found.", parent=self.root)
+        else:
+            self.pharmacy_table.delete(*self.pharmacy_table.get_children())
+            for row in rows:
+                self.pharmacy_table.insert("", END, values=row)
+        conn.close()
+    def deletelower(self):
+        conn=mysql.connector.connect(host="localhost",user="root",password="7006760858",database="UMMTRACKER")
+        cursor=conn.cursor()
+        query="DELETE FROM PHDATA WHERE REFNO=%s"
+        value=(self.refvar.get(),)
+        cursor.execute(query,value)
+        conn.commit()
+        self.fetchlower()
+        conn.close()
+        messagebox.showinfo("Success","DATA DELETED SUCCESSFULLY")
+    def resetlower(self):
+        self.refvar.set("")
+        self.cpynamevar.set(""),
+        self.typevar.set(""),             #***************IF WE WANT TO RESET ONLY CERTAIN VALUES NEED TO COMMENT OUT THOSE**************
+        self.mednamevar.set(""),
+        self.lotvar.set(""),
+        self.issuevar.set(""),
+        self.expirevar.set(""),
+        self.usesvar.set(""),
+        self.efectsvar.set(""),
+        self.warningvar.set(""),
+        self.dosagevar.set(""),
+        self.pricevar.set(""),
+        self.qntyvar.set("")
+        messagebox.showinfo("Success","DATA CLEARED SUCCESSFULLY")
+    def exitlower(self):
+        root.destroy()
 if __name__ =="__main__":
     root=Tk()
     obj=ummtracker(root)
